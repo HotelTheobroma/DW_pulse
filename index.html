@@ -24,7 +24,6 @@
   .pad button { padding: 8px 0; }
   .hidden { display: none !important; }
 
-  /* ── 모바일 ── */
   html { -webkit-text-size-adjust: 100%; }
   body { min-height: 100dvh; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   button, .tile, nav button { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -58,7 +57,6 @@
 
 <script>
 
-/* ── 모바일: 이미지 저장 ── */
 const COARSE = matchMedia('(pointer: coarse)').matches;
 function deliver(blob, name) {
   if (!COARSE) {
@@ -79,13 +77,11 @@ function deliver(blob, name) {
   });
   document.body.appendChild(box);
 }
-/* ─────────────────────────── 공통 ─────────────────────────── */
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const SZ = 640, DPR = Math.min(2, window.devicePixelRatio || 1);
 cv.width = SZ * DPR; cv.height = SZ * DPR; ctx.scale(DPR, DPR);
 const WATER = '#7fd6ff', GLOW = '#b48cff';
 
-// 배경(파편) 미리 그려 두기 — 고정 시드
 const bgCanvas = document.createElement('canvas'); bgCanvas.width = SZ; bgCanvas.height = SZ;
 (function () {
   const g = bgCanvas.getContext('2d'); let s = 7; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
@@ -109,7 +105,6 @@ function stone(x, y, w, h, lit) {
 function pt(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * SZ, y: (e.clientY - r.top) / r.height * SZ }; }
 const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
-/* ─────────────────────── ⑤ 같은 박자 ─────────────────────── */
 const Pulse = (() => {
   const K = 5, START_LEN = 3, GOAL_LEN = 7;
   const POS = [...Array(K).keys()].map(i => { const a = -Math.PI / 2 + 2 * Math.PI * i / K; return { x: 320 + 200 * Math.cos(a), y: 330 + 200 * Math.sin(a) }; });
@@ -145,16 +140,13 @@ const Pulse = (() => {
   }
   function draw(t) {
     const now = performance.now(); drawBG();
-    // 빛줄기
     POS.forEach((p, i) => { ctx.beginPath(); ctx.moveTo(320, 330); ctx.lineTo(p.x, p.y); ctx.strokeStyle = solved ? 'rgba(127,214,255,.6)' : (lit[i] > now ? 'rgba(220,190,255,.8)' : 'rgba(108,63,196,.35)'); ctx.lineWidth = lit[i] > now ? 3 : 1.5; ctx.stroke(); });
-    // 핵
     const beat = (lit.core > now ? 1.25 : 1) * (1 + .05 * Math.sin(t / 250));
     ctx.save(); ctx.translate(320, 330); ctx.scale(beat, beat);
     const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 52); g.addColorStop(0, solved ? '#e8fbff' : '#e9dcff'); g.addColorStop(1, solved ? '#1c5b84' : '#3a1f6e');
     ctx.beginPath(); for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; ctx.lineTo(48 * Math.cos(a), 48 * Math.sin(a)); } ctx.closePath();
     ctx.fillStyle = g; ctx.shadowColor = solved ? WATER : GLOW; ctx.shadowBlur = 24; ctx.fill(); ctx.restore(); ctx.shadowBlur = 0;
     POS.forEach((p, i) => crystal(p.x, p.y, solved || lit[i] > now));
-    // 진행 (작은 빛 알갱이)
     for (let k = 0; k < GOAL_LEN - START_LEN + 1; k++) {
       const x = 320 + (k - 2) * 22, y = 590, on = solved || k < len - START_LEN || (mode === 'input' && k === len - START_LEN && false);
       ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fillStyle = on ? (solved ? WATER : GLOW) : 'rgba(108,63,196,.3)'; ctx.fill();
@@ -166,7 +158,6 @@ const Pulse = (() => {
   return { name: '박동', file: 'pulse', draw, down, controls: () => [btn('▶', start)], leave: clear };
 })();
 
-/* ─────────────────────────── 틀 ─────────────────────────── */
 const PUZZLES = [Pulse];
 let cur = 0;
 function btn(label, fn) { const b = document.createElement('button'); b.className = 'act'; b.textContent = label; b.onclick = fn; return b; }
